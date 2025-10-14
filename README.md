@@ -50,3 +50,9 @@ print(outs["Q_lim_W"].min(), outs["Q_lim_W"].mean())
 
 ## Documentation
 See `documentation/` for FLUIDS, MODELS, UQ, and supporting guides.
+
+### Contributors
+
+- Mauricio Tano
+- Ilyas Yilgor
+- Josh Hansel

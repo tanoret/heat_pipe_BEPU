@@ -1,6 +1,6 @@
 # Demo Notebook
 
-**HTPIPE_demo_notebook.ipynb** steps through:
+**heatpipe_demo_notebook.ipynb** steps through:
 1) Fluid properties and TSAT inversion check.  
 2) Pressure-drop breakdown for a given pipe and mass flow.  
 3) Limits vs temperature sweep and plot.  

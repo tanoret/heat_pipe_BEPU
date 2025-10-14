@@ -6,7 +6,7 @@
 - **Fanno identities**: confirm \(F(M)\to 0\) as \(M\to 1^-\); monotonicity on subsonic branch; pressure ratio continuity.
 
 ## Golden tests (to add)
-- Reproduce the HTPIPE sample problems: tables and plots with agreed tolerances per variable.
+- Reproduce the heatpipe sample problems: tables and plots with agreed tolerances per variable.
 - Add regressions for limit curves vs temperature and Q vs geometry sweeps.
 
 ## Acceptance criteria (first pass)

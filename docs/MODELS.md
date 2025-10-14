@@ -1,4 +1,4 @@
-# Module: `htpipe.models`
+# Module: `heatpipe.models`
 
 Hydrodynamic model primitives: Reynolds/friction, pressure components, compressible adiabatic (Fanno) section, entrainment criteria, and convenience wrappers to compute a pressure budget and first-cut performance limits. All physics uses **cgs**.
 
@@ -115,7 +115,7 @@ $$
 \left(\frac{4fL}{D}\right)_\max = F(M_1)
 $$
 
-### Pressure ratio function (HTPIPE `PRESSR` analog)
+### Pressure ratio function (heatpipe `PRESSR` analog)
 $$
 \frac{P}{P^*} = \frac{1}{M}
 \sqrt{\frac{(\gamma+1)/2}{1 + (\gamma-1)M^2/2}}
@@ -161,7 +161,7 @@ Inputs:
 - `lengths`: `SectionLengths` (cm)
 - `geom`: `Geometry` ($r$, $R_\text{eff}$, optional $\lambda$)
 - `fluids`: dict with keys  
-  `p_sat, rho_v, rho_l, mu_v, mu_l, sigma, gamma, h_fg` (from `htpipe.io.props_for`)
+  `p_sat, rho_v, rho_l, mu_v, mu_l, sigma, gamma, h_fg` (from `heatpipe.io.props_for`)
 - `flags`: `FlowFlags` (laminar/turbulent selections)
 - `m_dot_g_s`: mass flow, g/s
 - `theta_deg`: inclination angle, degrees
@@ -191,8 +191,8 @@ First-cut performance limits (W) using area $A=\pi r^2$ and $h_{fg}$:
 ## Example
 
 ```python
-from htpipe.io import props_for
-from htpipe.models import *
+from heatpipe.io import props_for
+from heatpipe.models import *
 
 # State / fluid (cgs dict)
 T = 850.0
@@ -219,4 +219,4 @@ print(lims)
 
 ## Limitations & next steps
 - The capillary limit currently uses a single-path viscous balance with a nominal $f$; full wick/artery **porous** models and wet-point location will refine this.
-- Fanno treatment assumes constant area and properties across the adiabatic section (consistent with HTPIPE’s 1-D approach).
+- Fanno treatment assumes constant area and properties across the adiabatic section (consistent with heatpipe’s 1-D approach).

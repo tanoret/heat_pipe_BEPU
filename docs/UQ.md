@@ -1,4 +1,4 @@
-# HTPIPE UQ Layer (`htpipe.uq`)
+# heatpipe UQ Layer (`heatpipe.uq`)
 
 This module adds Best Estimate Plus Uncertainty (BEPU) capabilities on top of the deterministic hydrodynamic models. It includes Monte Carlo with Wilks tolerance logic, non-intrusive Hermite PCE with Sobol indices, and a simple Gaussian Process surrogate.
 
@@ -23,7 +23,7 @@ uq_gp(spec, n_train, run_fn=..., target="Q_lim_W", method="lhs", seed=None)
 ```
 
 ### Default run function
-`default_run_function(row: Dict[str,float]) -> Dict[str,float]` expects keys like `radius_cm`, `effective_pore_radius_cm`, `wavelength_cm`, `L_e`, `L_a`, `L_c`, `T_K`, and `fluid`. It computes `Q_cap_W`, `Q_sonic_W`, `Q_entr_W`, and `Q_lim_W` via the existing `htpipe` models.
+`default_run_function(row: Dict[str,float]) -> Dict[str,float]` expects keys like `radius_cm`, `effective_pore_radius_cm`, `wavelength_cm`, `L_e`, `L_a`, `L_c`, `T_K`, and `fluid`. It computes `Q_cap_W`, `Q_sonic_W`, `Q_entr_W`, and `Q_lim_W` via the existing `heatpipe` models.
 
 ## Notes
 - Correlation is applied using a Gaussian copula with Cholesky factorization.

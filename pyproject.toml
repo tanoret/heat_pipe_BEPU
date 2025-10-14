@@ -1,0 +1,40 @@
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "heatpipe"
+version = "0.1.0"
+description = "Hydrodynamic heat-pipe modeling with a BEPU (UQ) layer."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Idaho National Laboratory", email = "mauricio.tanoretamales@inl.gov" }
+]
+keywords = ["heat pipe", "hydrodynamics", "BEPU", "uncertainty quantification", "Fanno"]
+dependencies = ["numpy>=1.22", "matplotlib>=3.5"]
+optional-dependencies = { yaml = ["pyyaml>=6.0"] }
+
+[project.urls]
+Homepage = "https://github.com/INL/heatpipe"
+Documentation = "https://github.com/INL/heatpipe/tree/main/documentation"
+Issues = "https://github.com/INL/heatpipe/issues"
+
+[tool.setuptools]
+packages = ["heatpipe"]
+include-package-data = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I"]
+ignore = []

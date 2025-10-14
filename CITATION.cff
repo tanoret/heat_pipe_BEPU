@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "HEATPIPE: Hydrodynamic Heat Pipe Modeling with BEPU"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - name: Idaho National Laboratory
+  - name: Mauricio Tano
+version: "0.1.0"
+date-released: "2025-10-14"
+repository-code: "https://github.com/heat_pipe_BEPU"

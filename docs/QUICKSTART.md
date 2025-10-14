@@ -9,18 +9,18 @@ pip install pyyaml
 ```
 
 ## Add the package
-Unzip `htpipe_demo.zip`, then either add its parent to `PYTHONPATH` or install editable:
+Unzip `heatpipe_demo.zip`, then either add its parent to `PYTHONPATH` or install editable:
 ```bash
 pip install -e .
 ```
 
 ## Run the demo notebook
-Open `HTPIPE_demo_notebook.ipynb` and run all cells. It showcases fluids, pressure breakdowns, limit sweeps, geometry sweeps, and config I/O.
+Open `heatpipe_demo_notebook.ipynb` and run all cells. It showcases fluids, pressure breakdowns, limit sweeps, geometry sweeps, and config I/O.
 
 ## Minimal scripting example
 ```python
-from htpipe.io import props_for
-from htpipe.models import (Regime, SectionLengths, Geometry, FlowFlags,
+from heatpipe.io import props_for
+from heatpipe.models import (Regime, SectionLengths, Geometry, FlowFlags,
                            pressure_breakdown_cgs, estimate_limits_cgs)
 
 T = 900.0

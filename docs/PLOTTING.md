@@ -1,4 +1,4 @@
-# Module: `htpipe.plotting`
+# Module: `heatpipe.plotting`
 
 Single-plot functions (no styles/colors set). Each returns a `matplotlib.figure.Figure` and optionally saves a PNG when `savepath` is provided.
 

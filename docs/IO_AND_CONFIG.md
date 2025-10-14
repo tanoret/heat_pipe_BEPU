@@ -1,4 +1,4 @@
-# Module: `htpipe.io`
+# Module: `heatpipe.io`
 
 ## Dataclasses & enums
 ```python

@@ -1,7 +1,7 @@
 # Architecture
 
 ```
-htpipe/
+heatpipe/
   fluids.py     # fluid correlations & property bundles (cgs; optional SI wrapper)
   models.py     # Δp components, Fanno/sonic, capillary & entrainment limits
   io.py         # dataclass configs, JSON/YAML load/save, property bridge

@@ -1,7 +1,7 @@
-# HTPIPE (Python) — Documentation
+# heatpipe (Python) — Documentation
 
-This folder documents the Python port of the HTPIPE hydrodynamic heat‑pipe model.  
-It matches the latest code bundle (`htpipe` package: `fluids.py`, `models.py`, `io.py`, `plotting.py`) and the demo notebook `HTPIPE_demo_notebook.ipynb`.
+This folder documents the Python port of the heatpipe hydrodynamic heat‑pipe model.  
+It matches the latest code bundle (`heatpipe` package: `fluids.py`, `models.py`, `io.py`, `plotting.py`) and the demo notebook `heatpipe_demo_notebook.ipynb`.
 
 **Contents**
 - `QUICKSTART.md` — install & first run

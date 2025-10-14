@@ -1,0 +1,21 @@
+
+site_name: heatpipe
+theme:
+  name: material
+nav:
+  - Home: README.md
+  - Fluids: documentation/FLUIDS.md
+  - Models: documentation/MODELS.md
+  - UQ: documentation/UQ.md
+  - Architecture: documentation/ARCHITECTURE.md
+  - Units: documentation/UNITS.md
+  - I/O & Config: documentation/IO_AND_CONFIG.md
+  - Plotting: documentation/PLOTTING.md
+  - Validation: documentation/VALIDATION.md
+  - Roadmap: documentation/ROADMAP.md
+  - Contributing: CONTRIBUTING.md
+markdown_extensions:
+  - tables
+  - toc:
+      permalink: true
+  - admonition

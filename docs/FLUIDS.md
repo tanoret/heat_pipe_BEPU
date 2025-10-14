@@ -1,10 +1,10 @@
-# Module: `htpipe.fluids`
+# Module: `heatpipe.fluids`
 
 ## Purpose
 Property correlations and helpers for five working fluids:
 `lithium`, `sodium`, `potassium`, `mercury`, `water`.
 
-The module uses **cgs** units internally to match legacy HTPIPE practice.
+The module uses **cgs** units internally to match legacy heatpipe practice.
 
 ## Constants (cgs)
 - $\bar R = 8.314\times 10^{7}\ \text{erg/(mol·K)}$
@@ -105,7 +105,7 @@ $$
 ## Examples
 
 ```python
-from htpipe.fluids import Fluid, properties_cgs, tsat_from_p_cgs
+from heatpipe.fluids import Fluid, properties_cgs, tsat_from_p_cgs
 
 P = properties_cgs(Fluid.SODIUM, 900.0)
 T = tsat_from_p_cgs(Fluid.SODIUM, P.pv)   # ≈ 900 K
@@ -114,5 +114,5 @@ print(P.pv, P.rhol, P.muv, P.mul, P.hfg, P.sigma, P.gamma, P.rhov)
 ```
 
 > **Notes**
-> - Validity: correlations are intended for typical heat-pipe temperature ranges used in HTPIPE. The module does not enforce bounds; avoid extreme extrapolation.
+> - Validity: correlations are intended for typical heat-pipe temperature ranges used in heatpipe. The module does not enforce bounds; avoid extreme extrapolation.
 > - Units: all inputs/outputs are **cgs** except `hfg` (kJ/kg).

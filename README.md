@@ -1,5 +1,5 @@
 
-# heatpipe — Hydrodynamic Heat Pipe Modeling (Python) with BEPU
+# heat_pipe_BEPU — Hydrodynamic Heat Pipe Modeling with BEPU
 
 heatpipe is a unit-consistent Python package for **hydrodynamic heat-pipe** analysis inspired by heatpipe.
 It provides:

@@ -1,0 +1,30 @@
+{
+  "pipe": {
+    "fluid": "sodium",
+    "theta_deg": 0.0,
+    "geometry": {
+      "radius_cm": 0.5,
+      "effective_pore_radius_cm": 0.02,
+      "wavelength_cm": 0.05,
+      "passages": 6
+    },
+    "lengths": {
+      "L_e": 30.0,
+      "L_a": 20.0,
+      "L_c": 30.0
+    },
+    "flags": {
+      "vapor_regime_evap": "laminar",
+      "vapor_regime_adiab": "turbulent",
+      "vapor_regime_cond": "laminar"
+    }
+  },
+  "run": {
+    "option": 2,
+    "sweep": {
+      "start_K": 700.0,
+      "stop_K": 950.0,
+      "step_K": 25.0
+    }
+  }
+}

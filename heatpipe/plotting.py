@@ -15,12 +15,13 @@ def _finalize(fig, title: str, xlabel: str, ylabel: str, savepath: Optional[str]
         fig.savefig(savepath, dpi=200, bbox_inches="tight")
     return fig
 
-def plot_limits_vs_temperature(Ts, q_cap=None, q_sonic=None, q_ent=None, savepath: Optional[str] = None):
+def plot_limits_vs_temperature(Ts, q_cap=None, q_sonic=None, q_ent=None, q_visc=None, savepath: Optional[str] = None):
     fig = plt.figure()
     if Ts:
         if q_cap:   plt.plot(Ts, [None if v is None else v for v in q_cap], label="Capillary limit")
         if q_sonic: plt.plot(Ts, [None if v is None else v for v in q_sonic], label="Sonic limit")
         if q_ent:   plt.plot(Ts, [None if v is None else v for v in q_ent], label="Entrainment limit")
+        if q_visc:   plt.plot(Ts, [None if v is None else v for v in q_visc], label="Viscous limit")
         plt.legend()
     return _finalize(fig, "Heat-pipe performance limits vs temperature", "Evaporator exit temperature [K]", "Q limit [W]", savepath)
 

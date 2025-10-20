@@ -1,0 +1,5 @@
+numpy>=1.22
+matplotlib>=3.5
+
+[yaml]
+pyyaml>=6.0

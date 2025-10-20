@@ -178,6 +178,7 @@ class Limits:
     q_capillary_W: Optional[float]
     q_sonic_W: Optional[float]
     q_entrainment_W: Optional[float]
+    q_viscous_W: Optional[float]
 
 def estimate_limits_cgs(
     lengths: SectionLengths,
@@ -190,6 +191,10 @@ def estimate_limits_cgs(
     AV_cm2 = PI * R**2
     AV_m2 = AV_cm2 * 1e-4
     h_fg_J_kg = fluids["h_fg"] * 1e3
+    L_eff = ((lengths.L_e+lengths.L_c)/2 + lengths.L_a)/100 # effective length [m]
+
+    # Viscous
+    q_visc = AV_m2**2*h_fg_J_kg*fluids["rho_v"]*1000*(fluids["p_sat"]*0.1)/16/PI/(fluids["mu_v"]*0.1)/L_eff
 
     # Sonic (characteristic)
     a = sqrt(fluids["gamma"] * fluids["p_sat"] / max(fluids["rho_v"], 1e-9))
@@ -215,4 +220,4 @@ def estimate_limits_cgs(
         Gent = fluids["rho_v"] * Vcrit
         q_ent = Gent * h_fg_J_kg * AV_m2 * 1e-3
 
-    return Limits(q_capillary_W=q_cap, q_sonic_W=q_sonic, q_entrainment_W=q_ent)
+    return Limits(q_capillary_W=q_cap, q_sonic_W=q_sonic, q_entrainment_W=q_ent, q_viscous_W=q_visc)

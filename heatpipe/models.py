@@ -39,9 +39,12 @@ def reynolds(m_dot_g_s: float, mu_poise: float, rho_g_cm3: float, area_cm2: floa
 def fanning_friction_factor(Re: float, regime: Regime) -> float:
     if Re <= 0:
         return 0.0
-    if regime == Regime.LAMINAR:
+    elif Re < 2000:
         return 16.0 / Re
-    return 0.0791 * (Re ** -0.25)
+    elif Re < 20000:
+        return 0.0791 / (Re**0.25)
+    else:
+        return 0.046 / (Re**0.2)
 
 def velocity_profile_factor(regime: Regime) -> float:
     return 1.234 if regime == Regime.LAMINAR else 2.22
@@ -55,7 +58,11 @@ def dp_inertial(A_prof: float, rho_v: float, V_exit: float) -> float:
 def dp_hydrostatic(rho_l: float, delta_z_cm: float, theta_deg: float) -> float:
     return rho_l * GRAV * delta_z_cm * sin(theta_deg * PI / 180.0)
 
-def capillary_pressure_drop(sigma: float, r_eff_cm: float) -> float:
+def dp_liquid(mdot: float, t_a:float, rho: float, mu: float, L_eff: float, A_l: float) -> float:
+    K = t_a**2 / 12
+    return mu*mdot/(rho*t_a**2*A_l)
+
+def max_capillary_pressure(sigma: float, r_eff_cm: float) -> float:
     return 0.0 if r_eff_cm <= 0 else 2.0 * sigma / r_eff_cm
 
 # --- Fanno relations (compressible adiabatic with friction) ---
@@ -123,6 +130,7 @@ class PressureBreakdown:
     dp_capillary: float
     choked_adiab: bool
     M_out_adiab: float
+    dp_tot: float
 
 def pressure_breakdown_cgs(
     lengths: SectionLengths,
@@ -160,8 +168,8 @@ def pressure_breakdown_cgs(
         P2, choked, M_out = adiabatic_section_pressure_outlet(fluids["p_sat"], fluids["gamma"], f_a, lengths.L_a, D, max(min(M_in, 0.99), 1e-6))
         dp_adiab = max(fluids["p_sat"] - P2, 0.0)
 
-    dp_cap = capillary_pressure_drop(fluids["sigma"], geom.effective_pore_radius_cm)
-
+    dp_cap = max_capillary_pressure(fluids["sigma"], geom.effective_pore_radius_cm)
+    dp_tot = dp_inert+dp_fric_evap+dp_adiab+dp_fric_cond+dp_hyd
     return PressureBreakdown(
         dp_fric_evap=dp_fric_evap,
         dp_inert_evap=dp_inert,
@@ -170,7 +178,8 @@ def pressure_breakdown_cgs(
         dp_hydro=dp_hyd,
         dp_capillary=dp_cap,
         choked_adiab=choked,
-        M_out_adiab=M_out
+        M_out_adiab=M_out,
+        dp_tot = dp_tot,
     )
 
 @dataclass
@@ -184,6 +193,8 @@ def estimate_limits_cgs(
     geom: Geometry,
     fluids: Dict[str, float],
     flags: FlowFlags,
+    Q_guess=1000.0,
+    max_it = 1000,
 ) -> Limits:
     from math import sqrt
     R = geom.radius_cm
@@ -197,16 +208,35 @@ def estimate_limits_cgs(
     q_sonic = G * h_fg_J_kg * AV_m2 * 1e-3
 
     # Capillary (very rough, use available dp to infer a characteristic V)
-    dp_avail = capillary_pressure_drop(fluids["sigma"], geom.effective_pore_radius_cm)
-    if dp_avail <= 0:
-        q_cap = None
-    else:
-        D_cm = 2.0 * R
-        f_nom = 0.02
-        L_char = max(1.0, lengths.L_e + lengths.L_a + lengths.L_c)
-        Vchar = sqrt(dp_avail * D_cm / (2.0 * f_nom * max(fluids["rho_v"], 1e-9) * L_char))
-        Gcap = fluids["rho_v"] * Vchar
-        q_cap = Gcap * h_fg_J_kg * AV_m2 * 1e-3
+    #mdot = Q_guess/fluids["h_fg"]
+    Q_del = 1000.0
+    dp_err_old = 0.0
+    #n_it = 1
+    for n_it in range(1,max_it):
+        dp_avail = max_capillary_pressure(fluids["sigma"], geom.effective_pore_radius_cm)
+        print(dp_avail)
+        if dp_avail <= 0:
+         q_cap = None
+        else:
+            mdot = Q_guess/fluids["h_fg"]
+            pres = pressure_breakdown_cgs(lengths, geom, fluids, flags, mdot, theta_deg=0)
+            dp_err = (pres.dp_tot-pres.dp_capillary)/pres.dp_capillary*100
+            print(dp_err)
+            if abs(dp_err) < 0.1:
+                q_cap = Q_guess
+                print(Q_guess)
+                break
+            elif dp_err > 0:
+                Q_guess = Q_guess-Q_del
+                print(Q_guess)
+            elif dp_err < 0:
+                Q_guess = Q_guess+Q_del
+                print(Q_guess)
+            if dp_err*dp_err_old < 0:
+                Q_del = Q_del/2
+                print(Q_guess)
+            dp_err_old = dp_err
+                #q_cap = Gcap * h_fg_J_kg * AV_m2 * 1e-3
 
     # Entrainment (if wavelength known)
     q_ent = None

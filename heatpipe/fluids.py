@@ -174,12 +174,24 @@ def properties_cgs(fluid: Fluid, T: float):
 # SI wrapper if needed (not used in this demo notebook)
 @dataclass
 class PropertiesSI:
-    p_sat: float       # Pa
+    pv: float       # Pa
     mw: float          # g/mol (kept for convenience)
-    rho_l: float       # kg/m^3
-    mu_v: float        # Pa·s
-    mu_l: float        # Pa·s
-    h_fg: float        # J/kg
+    rhol: float       # kg/m^3
+    muv: float        # Pa·s
+    mul: float        # Pa·s
+    hfg: float        # J/kg
     sigma: float       # N/m
     gamma: float       # [-]
-    rho_v: float       # kg/m^3
+    rhov: float       # kg/m^3
+
+def properties_SI(fluid: Fluid, T: float):
+    pv = _pv_cgs(fluid, T)*POISE_TO_PA_S
+    mw = _mw(fluid)
+    rhol = _rhol_cgs(fluid, T)*GCML3_TO_KGM3    
+    muv = _muv_cgs(fluid, T)*POISE_TO_PA_S
+    mul = _mul_cgs(fluid, T)*POISE_TO_PA_S
+    hfg = _hfg_kj_per_kg(fluid, T)*1000
+    sigma = _sigma_cgs(fluid, T)*DYN_PER_CM_TO_N_PER_M
+    gamma = _gamma(fluid, T)
+    rhov = (mw * _pv_cgs(fluid, T) / (R_BAR_CGS * T))*GCML3_TO_KGM3
+    return PropertiesSI(pv, mw, rhol, muv, mul, hfg, sigma, gamma, rhov)

@@ -18,10 +18,12 @@ class SectionLengths:
 
 @dataclass
 class Geometry:
-    radius_cm: float
+    radius_cm: float # Inner radius
+    t_a_cm: float # Annulus thickness
+    t_w_cm: float # Wick thickness
     effective_pore_radius_cm: float = 0.0
-    wavelength_cm: Optional[float] = None
-    passages: int = 1
+    wavelength_cm: Optional[float] = None # Characteristic length for entrainment
+    passages: int = 1 
 
 @dataclass
 class FlowFlags:
@@ -31,6 +33,12 @@ class FlowFlags:
 
 def cross_section_area(radius_cm: float) -> float:
     return PI * radius_cm**2
+
+def vapor_cross_section_area(radius_cm: float, t_a_cm: float, t_w_cm: float) -> float:
+    return PI * (radius_cm-t_a_cm-t_w_cm)**2
+
+def wick_cross_section_area(radius_cm: float, t_a_cm: float, t_w_cm: float) -> float:
+    return PI * (radius_cm**2 - (radius_cm-t_a_cm)**2) # Assume flow in the annulus
 
 def reynolds(m_dot_g_s: float, mu_poise: float, rho_g_cm3: float, area_cm2: float, d_h_cm: float) -> float:
     V = m_dot_g_s / (rho_g_cm3 * area_cm2)

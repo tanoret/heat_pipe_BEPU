@@ -7,6 +7,7 @@ heatpipe/io.py
 heatpipe/models.py
 heatpipe/plotting.py
 heatpipe/uq.py
+heatpipe/validation.py
 heatpipe.egg-info/PKG-INFO
 heatpipe.egg-info/SOURCES.txt
 heatpipe.egg-info/dependency_links.txt
@@ -15,3 +16,4 @@ heatpipe.egg-info/top_level.txt
 tests/test_fluids.py
 tests/test_models.py
 tests/test_uq.py
+tests/test_validation_cases.py

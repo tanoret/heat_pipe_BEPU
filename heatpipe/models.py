@@ -202,60 +202,116 @@ def estimate_limits_cgs(
     geom: Geometry,
     fluids: Dict[str, float],
     flags: FlowFlags,
-    Q_guess=1000.0,
-    max_it = 1000,
-) -> Limits:
+    theta_deg: float = 0.0,
+    q_max_search_W: float = 5.0e4,
+    tol_rel: float = 1e-3,
+    ) -> Limits:
+
+    """Return classical transport limits for the supplied configuration.
+
+    The routine evaluates the sonic, entrainment and capillary limits by
+    solving simplified balance relations that are common in the heat-pipe
+    literature (e.g. Faghri, 1995; Reay & Kew, 2006).  All calculations are
+    performed in SI internally to avoid unit drift before the results are
+    reported in Watts.
+    """
+
     from math import sqrt
-    R = geom.radius_cm
-    AV_cm2 = PI * R**2
-    AV_m2 = AV_cm2 * 1e-4
-    h_fg_J_kg = fluids["h_fg"] * 1e3
-    L_eff = ((lengths.L_e+lengths.L_c)/2 + lengths.L_a)/100 # effective length [m]
 
-    # Viscous
-    q_visc = AV_m2**2*h_fg_J_kg*fluids["rho_v"]*1000*(fluids["p_sat"]*0.1)/16/PI/(fluids["mu_v"]*0.1)/L_eff
+    # --- common geometric conversions ---
+    R_cm = geom.radius_cm
+    area_cm2 = PI * R_cm**2
+    area_m2 = area_cm2 * 1.0e-4
+    length_total_cm = lengths.L_e + lengths.L_a + lengths.L_c
+    length_total_m = length_total_cm * 1.0e-2
 
-    # Sonic (characteristic)
-    a = sqrt(fluids["gamma"] * fluids["p_sat"] / max(fluids["rho_v"], 1e-9))
-    G = fluids["rho_v"] * a  # g/(cm^2 s)
-    q_sonic = G * h_fg_J_kg * AV_m2 * 1e-3
+    # --- fluid property conversions ---
+    rho_v_kg_m3 = fluids["rho_v"] * 1.0e3
+    rho_l_kg_m3 = fluids["rho_l"] * 1.0e3
+    mu_l_Pa_s = fluids["mu_l"] * 0.1
+    p_sat_Pa = fluids["p_sat"] * 0.1
+    sigma_N_m = fluids["sigma"] * 1.0e-3
+    h_fg_J_kg = fluids["h_fg"] * 1.0e3
+    h_fg_J_g = fluids["h_fg"]  # (kJ/kg == J/g)
 
-    # Capillary (very rough, use available dp to infer a characteristic V)
-    #mdot = Q_guess/fluids["h_fg"]
-    Q_del = 1000.0
-    dp_err_old = 0.0
-    #n_it = 1
-    for n_it in range(1,max_it):
-        dp_avail = max_capillary_pressure(fluids["sigma"], geom.effective_pore_radius_cm)
-        print(dp_avail)
-        if dp_avail <= 0:
-         q_cap = None
+    # --- sonic limit ---
+    if rho_v_kg_m3 <= 0 or p_sat_Pa <= 0:
+        q_sonic = None
+    else:
+        a = sqrt(max(fluids["gamma"], 1e-9) * p_sat_Pa / max(rho_v_kg_m3, 1e-12))
+        mass_flux_kg_m2_s = rho_v_kg_m3 * a
+        q_sonic = mass_flux_kg_m2_s * h_fg_J_kg * area_m2
+
+    # --- viscous (liquid) limit ---
+    # Treat the wick as a simple capillary annulus with permeability ~ r_p^2 / 8
+    # (see e.g. Faghri 1995, Eq. 4.53).  Use Darcy's law with gravity head.
+    if geom.effective_pore_radius_cm > 0:
+        r_eff_m = geom.effective_pore_radius_cm * 1.0e-2
+        permeability_m2 = r_eff_m**2 / 8.0
+        R_outer_m = R_cm * 1.0e-2
+        R_inner_m = max(R_cm - geom.t_a_cm, 0.0) * 1.0e-2
+        wick_area_m2 = PI * max(R_outer_m**2 - R_inner_m**2, 0.0)
+        dp_available_Pa = max_capillary_pressure(sigma_N_m * 1.0e3, geom.effective_pore_radius_cm) * 0.1
+        dp_gravity_Pa = (rho_l_kg_m3 - rho_v_kg_m3) * 9.80 * length_total_m * abs(
+            sin(theta_deg * PI / 180.0)
+        )
+        dp_driving_Pa = max(dp_available_Pa - dp_gravity_Pa, 0.0)
+        if dp_driving_Pa <= 0:
+            q_visc = None
         else:
-            mdot = Q_guess/fluids["h_fg"]
-            pres = pressure_breakdown_cgs(lengths, geom, fluids, flags, mdot, theta_deg=0)
-            dp_err = (pres.dp_tot-pres.dp_capillary)/pres.dp_capillary*100
-            print(dp_err)
-            if abs(dp_err) < 0.1:
-                q_cap = Q_guess
-                print(Q_guess)
-                break
-            elif dp_err > 0:
-                Q_guess = Q_guess-Q_del
-                print(Q_guess)
-            elif dp_err < 0:
-                Q_guess = Q_guess+Q_del
-                print(Q_guess)
-            if dp_err*dp_err_old < 0:
-                Q_del = Q_del/2
-                print(Q_guess)
-            dp_err_old = dp_err
-                #q_cap = Gcap * h_fg_J_kg * AV_m2 * 1e-3
+            volumetric_flow_m3_s = permeability_m2 * wick_area_m2 * dp_driving_Pa / (
+                mu_l_Pa_s * max(length_total_m, 1e-9)
+            )
+            mass_flow_kg_s = volumetric_flow_m3_s * rho_l_kg_m3
+            q_visc = mass_flow_kg_s * h_fg_J_kg
+    else:
+        q_visc = None
 
-    # Entrainment (if wavelength known)
-    q_ent = None
+    # --- capillary limit (solve m_dot so vapor Δp <= capillary Δp) ---
+    dp_cap_cgs = max_capillary_pressure(fluids["sigma"], geom.effective_pore_radius_cm)
+    if dp_cap_cgs <= 0:
+        q_cap = None
+    else:
+        def dp_error(q_watts: float) -> float:
+            if q_watts <= 0:
+                return -dp_cap_cgs
+            m_dot_g_s = q_watts / max(h_fg_J_g, 1e-9)
+            pb = pressure_breakdown_cgs(
+                lengths, geom, fluids, flags, m_dot_g_s=m_dot_g_s, theta_deg=theta_deg
+            )
+            return pb.dp_tot - pb.dp_capillary
+
+        lo, hi = 0.0, q_max_search_W
+        err_lo = dp_error(lo)
+        err_hi = dp_error(hi)
+        if err_hi <= 0:
+            q_cap = hi
+        else:
+            for _ in range(80):
+                mid = 0.5 * (lo + hi)
+                err_mid = dp_error(mid)
+                if abs(err_mid) <= tol_rel * dp_cap_cgs:
+                    q_cap = mid
+                    break
+                if err_mid > 0:
+                    hi = mid
+                    err_hi = err_mid
+                else:
+                    lo = mid
+                    err_lo = err_mid
+            else:
+                q_cap = 0.5 * (lo + hi)
+
+    # --- entrainment limit ---
     if geom.wavelength_cm:
-        Vcrit = sqrt(2.0 * pi * fluids["sigma"] / (max(fluids["rho_v"], 1e-9) * geom.wavelength_cm))
-        Gent = fluids["rho_v"] * Vcrit
-        q_ent = Gent * h_fg_J_kg * AV_m2 * 1e-3
+        wavelength_m = geom.wavelength_cm * 1.0e-2
+        if wavelength_m <= 0 or rho_v_kg_m3 <= 0:
+            q_ent = None
+        else:
+            Vcrit = sqrt(2.0 * PI * sigma_N_m / (rho_v_kg_m3 * wavelength_m))
+            mass_flux_kg_m2_s = rho_v_kg_m3 * Vcrit
+            q_ent = mass_flux_kg_m2_s * h_fg_J_kg * area_m2
+    else:
+        q_ent = None
 
     return Limits(q_capillary_W=q_cap, q_sonic_W=q_sonic, q_entrainment_W=q_ent, q_viscous_W=q_visc)

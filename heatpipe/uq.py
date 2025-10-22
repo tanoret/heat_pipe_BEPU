@@ -395,9 +395,14 @@ def default_run_function(x_row: Dict[str, float]) -> Dict[str, float]:
     from .io import props_for
     from .models import Geometry, SectionLengths, FlowFlags, Regime, estimate_limits_cgs
     T = float(x_row.get("T_K", 850.0))
-    geom = Geometry(radius_cm=float(x_row.get("radius_cm", 0.5)),
-                    effective_pore_radius_cm=float(x_row.get("effective_pore_radius_cm", 0.02)),
-                    wavelength_cm=float(x_row.get("wavelength_cm", 0.05)))
+    geom = Geometry(
+        radius_cm=float(x_row.get("radius_cm", 0.5)),
+        t_a_cm=float(x_row.get("t_a_cm", 0.05)),
+        t_w_cm=float(x_row.get("t_w_cm", 0.05)),
+        effective_pore_radius_cm=float(x_row.get("effective_pore_radius_cm", 0.02)),
+        wavelength_cm=float(x_row.get("wavelength_cm", 0.05)),
+        passages=int(x_row.get("passages", 1)),
+    )
     L = SectionLengths(L_e=float(x_row.get("L_e", 30.0)),
                        L_a=float(x_row.get("L_a", 20.0)),
                        L_c=float(x_row.get("L_c", 30.0)))

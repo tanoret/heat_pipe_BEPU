@@ -13,10 +13,6 @@ except Exception:
 
 from .fluids import Fluid, properties_cgs  # type: ignore
 
-class Regime(str, Enum):
-    laminar = "laminar"
-    turbulent = "turbulent"
-
 class Option(int, Enum):
     design_passages = 1
     limits_vs_temperature = 2
@@ -37,18 +33,11 @@ class Geometry:
     passages: int = 1
 
 @dataclass
-class FlowFlags:
-    vapor_regime_evap: Regime = Regime.laminar
-    vapor_regime_adiab: Regime = Regime.laminar
-    vapor_regime_cond: Regime = Regime.laminar
-
-@dataclass
 class PipeConfig:
     fluid: str
     theta_deg: float
     geometry: Geometry
     lengths: SectionLengths
-    flags: FlowFlags
 
 @dataclass
 class SweepSpec:
@@ -108,17 +97,11 @@ def _load_payload(d: Dict[str, Any]) -> Tuple[PipeConfig, RunSpec]:
         wavelength_cm=(None if g.get("wavelength_cm") in (None, "null") else float(g.get("wavelength_cm", 0.0))),
         passages=int(g.get("passages", 1)),
     )
-    flags = FlowFlags(
-        vapor_regime_evap=_enum_val(Regime, f.get("vapor_regime_evap", "laminar")),
-        vapor_regime_adiab=_enum_val(Regime, f.get("vapor_regime_adiab", "laminar")),
-        vapor_regime_cond=_enum_val(Regime, f.get("vapor_regime_cond", "laminar")),
-    )
     cfg = PipeConfig(
         fluid=str(p["fluid"]),
         theta_deg=float(p.get("theta_deg", 0.0)),
         geometry=geom,
         lengths=SectionLengths(L_e=float(l["L_e"]), L_a=float(l["L_a"]), L_c=float(l["L_c"])),
-        flags=flags,
     )
     r = d.get("run", {"option": 2})
     opt = _enum_val(Option, r.get("option", 2))
@@ -144,4 +127,4 @@ def props_for(fluid_name: str, T_K: float):
     from .fluids import Fluid, properties_cgs
     f = Fluid(fluid_name) if not isinstance(fluid_name, Fluid) else fluid_name
     P = properties_cgs(f, T_K)
-    return {"p_sat": P.pv, "rho_v": P.rhov, "rho_l": P.rhol, "mu_v": P.muv, "mu_l": P.mul, "sigma": P.sigma, "gamma": P.gamma, "h_fg": P.hfg}
+    return {"T_sat": T_K, "p_sat": P.pv, "rho_v": P.rhov, "rho_l": P.rhol, "mu_v": P.muv, "mu_l": P.mul, "sigma": P.sigma, "gamma": P.gamma, "h_fg": P.hfg, "m_w": P.mw}

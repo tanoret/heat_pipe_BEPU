@@ -25,13 +25,24 @@ def _assert_with_reference(key: str, datum: ReferenceDatum, actual: float) -> No
 
 @pytest.mark.parametrize("case", CASES, ids=lambda c: c.name)
 def test_pressure_breakdown_regressions(case):
+    if not case.pressure_refs:
+        pytest.skip(f"{case.name} has no pressure_refs")
+
     fluids = props_for(case.fluid, case.temperature_K)
-    breakdown = pressure_breakdown_cgs(
+    limits = estimate_limits_cgs(
         case.lengths,
         case.geometry,
         fluids,
-        case.flags,
-        m_dot_g_s=case.m_dot_g_s,
+        case.fluid,
+        theta_deg=case.theta_deg,
+    )
+    m_dot_g_s = limits.q_capillary_W / fluids["h_fg"] # type: ignore
+    breakdown = pressure_breakdown_cgs(
+        case.fluid,
+        case.lengths,
+        case.geometry,
+        fluids,
+        m_dot_g_s=m_dot_g_s,
         theta_deg=case.theta_deg,
     )
 
@@ -47,7 +58,7 @@ def test_limit_regressions(case):
         case.lengths,
         case.geometry,
         fluids,
-        case.flags,
+        case.fluid,
         theta_deg=case.theta_deg,
     )
 

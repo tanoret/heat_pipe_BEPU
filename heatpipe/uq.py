@@ -393,17 +393,21 @@ def default_run_function(x_row: Dict[str, float]) -> Dict[str, float]:
     Users may override this with a project-specific function.
     """
     from .io import props_for
-    from .models import Geometry, SectionLengths, FlowFlags, Regime, estimate_limits_cgs
+    from .models import Geometry, SectionLengths, estimate_limits_cgs
     T = float(x_row.get("T_K", 850.0))
-    geom = Geometry(radius_cm=float(x_row.get("radius_cm", 0.5)),
-                    effective_pore_radius_cm=float(x_row.get("effective_pore_radius_cm", 0.02)),
-                    wavelength_cm=float(x_row.get("wavelength_cm", 0.05)))
+    geom = Geometry(
+        radius_cm=float(x_row.get("radius_cm", 0.5)),
+        t_a_cm=float(x_row.get("t_a_cm", 0.05)),
+        t_w_cm=float(x_row.get("t_w_cm", 0.05)),
+        effective_pore_radius_cm=float(x_row.get("effective_pore_radius_cm", 0.02)),
+        wavelength_cm=float(x_row.get("wavelength_cm", 0.05)),
+    )
     L = SectionLengths(L_e=float(x_row.get("L_e", 30.0)),
                        L_a=float(x_row.get("L_a", 20.0)),
                        L_c=float(x_row.get("L_c", 30.0)))
-    flags = FlowFlags(vapor_regime_evap=Regime.LAMINAR, vapor_regime_adiab=Regime.TURBULENT, vapor_regime_cond=Regime.LAMINAR)
+    fluid_name = str(x_row.get("fluid", "sodium"))
     f = props_for(str(x_row.get("fluid", "sodium")), T)
-    lims = estimate_limits_cgs(L, geom, f, flags)
+    lims = estimate_limits_cgs(L, geom, f, fluid_name, theta_deg=0.0)
     qvals = [q for q in [lims.q_capillary_W, lims.q_sonic_W, lims.q_entrainment_W] if q is not None]
     Qlim = float(min(qvals)) if qvals else float("nan")
     return {

@@ -5,8 +5,9 @@
 - **Dimensional sanity**: ensure Δp terms scale with \(L/D\), \(V^2\), and \(\sin\theta\) as expected.
 - **Fanno identities**: confirm \(F(M)\to 0\) as \(M\to 1^-\); monotonicity on subsonic branch; pressure ratio continuity.
 
-## Golden tests (to add)
-- Reproduce the heatpipe sample problems: tables and plots with agreed tolerances per variable.
+## Golden tests
+- Sodium (Faghri), water (Reay & Kew) and potassium (Kroeger) benchmarks enforce the full
+  pressure budget and operating limits within a few percent.
 - Add regressions for limit curves vs temperature and Q vs geometry sweeps.
 
 ## Acceptance criteria (first pass)
